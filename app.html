@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid #e5e7eb;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .input-group label {
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .currency-input {
+            flex-grow: 1;
+        }
+        .currency-input input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            background-color: #f9fafb;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .currency-input input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+        .type-selector {
+            display: flex;
+            background-color: #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.25rem;
+        }
+        .type-selector button {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            color: #4b5563;
+        }
+        .type-selector button.active {
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #1f2937;
+        }
+        .result-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .result-card {
+            background-color: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+        .result-card h4 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        .result-card .amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .result-card.net-pay {
+            background-color: #2563eb;
+            color: white;
+            grid-column: span 2;
+        }
+        .result-card.net-pay h4 {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .result-card.net-pay .amount {
+            color: white;
+            font-size: 2rem;
+        }
+        .details-section {
+            margin-top: 2.5rem;
+        }
+        .details-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .details-item:last-child {
+            border-bottom: none;
+        }
+        .details-item span:first-child {
+            font-weight: 500;
+            color: #374151;
+        }
+        .details-item span:last-child {
+            font-weight: 600;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-6">Salary Calculator</h2>
+        <p class="text-center text-gray-500 mb-8">Enter your salary and choose the calculation type to see your breakdown.</p>
+
+        <div class="input-group">
+            <div class="currency-input">
+                <input type="text" id="salaryInput" placeholder="Enter salary (e.g., 1833333.34)">
+            </div>
+            <div class="type-selector">
+                <button id="monthlyBtn" class="active" onclick="setCalculationType('monthly')">Monthly</button>
+                <button id="yearlyBtn" onclick="setCalculationType('yearly')">Yearly</button>
+            </div>
+        </div>
+        
+        <div id="results">
+            <div class="result-section">
+                <div class="result-card">
+                    <h4>Gross Monthly</h4>
+                    <div class="amount" id="grossMonthly">₦0.00</div>
+                </div>
+                <div class="result-card">
+                    <h4>Gross Yearly</h4>
+                    <div class="amount" id="grossYearly">₦0.00</div>
+                </div>
+                <div class="result-card net-pay">
+                    <h4>Net Pay</h4>
+                    <div class="amount" id="netPay">₦0.00</div>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Deductions Breakdown</h3>
+                <div class="details-item">
+                    <span>PIT</span>
+                    <span id="pitDeduction">₦0.00</span>
+                </div>
+                <div class="details-item">
+                    <span>National Pension Fund</span>
+                    <span id="pensionDeduction">₦0.00</span>
+                </div>
+                <div class="details-item">
+                    <span>Payroll Adjustment</span>
+                    <span id="payrollAdjustment">₦0.00</span>
+                </div>
+                <div class="details-item">
+                    <span>Total Deductions</span>
+                    <span id="totalDeductions">₦0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const salaryInput = document.getElementById('salaryInput');
+            const monthlyBtn = document.getElementById('monthlyBtn');
+            const yearlyBtn = document.getElementById('yearlyBtn');
+            const grossMonthlyEl = document.getElementById('grossMonthly');
+            const grossYearlyEl = document.getElementById('grossYearly');
+            const netPayEl = document.getElementById('netPay');
+            const pitDeductionEl = document.getElementById('pitDeduction');
+            const pensionDeductionEl = document.getElementById('pensionDeduction');
+            const payrollAdjustmentEl = document.getElementById('payrollAdjustment');
+            const totalDeductionsEl = document.getElementById('totalDeductions');
+
+            let isMonthly = true;
+
+            window.setCalculationType = (type) => {
+                isMonthly = (type === 'monthly');
+                if (isMonthly) {
+                    monthlyBtn.classList.add('active');
+                    yearlyBtn.classList.remove('active');
+                } else {
+                    yearlyBtn.classList.add('active');
+                    monthlyBtn.classList.remove('active');
+                }
+                calculateSalary();
+            };
+
+            const formatCurrency = (amount) => {
+                return `₦${Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            };
+
+            const calculateSalary = () => {
+                const inputValue = parseFloat(salaryInput.value.replace(/,/g, ''));
+                if (isNaN(inputValue) || inputValue <= 0) {
+                    grossMonthlyEl.textContent = '₦0.00';
+                    grossYearlyEl.textContent = '₦0.00';
+                    netPayEl.textContent = '₦0.00';
+                    pitDeductionEl.textContent = '₦0.00';
+                    pensionDeductionEl.textContent = '₦0.00';
+                    payrollAdjustmentEl.textContent = '₦0.00';
+                    totalDeductionsEl.textContent = '₦0.00';
+                    return;
+                }
+
+                let monthlyGross;
+                if (isMonthly) {
+                    monthlyGross = inputValue;
+                } else {
+                    monthlyGross = inputValue / 12;
+                }
+
+                // Based on an average of the provided payslips.
+                // The payroll adjustment is highly variable, so it is set to a flat value
+                // for consistent calculations.
+                const pensionRate = 0.08; 
+                const pitRate = 0.165; // This is a simplified rate.
+                const payrollAdj = -221125.33; 
+
+                const pension = monthlyGross * pensionRate;
+                const pit = monthlyGross * pitRate;
+                const totalDeductions = pension + pit + payrollAdj;
+                const netPay = monthlyGross - totalDeductions;
+                const yearlyGross = monthlyGross * 12;
+
+                grossMonthlyEl.textContent = formatCurrency(monthlyGross);
+                grossYearlyEl.textContent = formatCurrency(yearlyGross);
+                netPayEl.textContent = formatCurrency(netPay);
+                pitDeductionEl.textContent = formatCurrency(pit);
+                pensionDeductionEl.textContent = formatCurrency(pension);
+                payrollAdjustmentEl.textContent = formatCurrency(payrollAdj);
+                totalDeductionsEl.textContent = formatCurrency(totalDeductions);
+            };
+
+            salaryInput.addEventListener('input', calculateSalary);
+        });
+    </script>
+
+</body>
+</html>
